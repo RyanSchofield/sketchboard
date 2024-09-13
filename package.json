@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./src/server/server.ts",
   "scripts": {
+    "start": "yarn dev-server-node",
     "dev-node": "concurrently -n server,client -c red,blue \"yarn dev-server-node\" \"yarn dev-client\"",
     "dev-bun": "concurrently -n server,client -c red,blue \"yarn dev-server-bun\" \"yarn dev-client\"",
     "dev-server-node": "yarn run -T tsx watch ./src/server/server.node.ts",
