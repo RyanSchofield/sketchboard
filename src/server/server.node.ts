@@ -2,12 +2,25 @@ import "dotenv/config";
 
 import cors from "@fastify/cors";
 import websocketPlugin from "@fastify/websocket";
+import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
+
+import fs from "fs";
+
+import path from "path";
+// import dirname from "path";
+// import { PlatformPath } from "path";
+// import { fileURLToPath } from "url";
+
+// import { dirname } from 'node:path';
+// import { fileURLToPath } from 'node:url';
 
 import { loadAsset, storeAsset } from "./assets";
 import { makeOrLoadRoom } from "./rooms";
 
-const PORT = 5858;
+const PORT = process.env.PORT ?? 5858;
+
+// const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // For this example we use a simple fastify server with the official websocket plugin
 // To keep things simple we're skipping normal production concerns like rate limiting and input validation.
@@ -15,10 +28,13 @@ const app = fastify();
 app.register(websocketPlugin);
 app.register(cors, { origin: "*" });
 
+app.register(fastifyStatic, {
+  root: path.resolve("./src/server/public"),
+  // prefix: "/public/", // optional: default '/'
+  // constraints: { host: 'example.com' } // optional: default {}
+});
+
 app.register(async (app) => {
-  app.get("/rooms", { websocket: true }, async (socket, req) => {
-    socket.send("rooms");
-  });
   // This is the main entrypoint for the multiplayer sync
   app.get("/connect/:roomId", { websocket: true }, async (socket, req) => {
     const roomId = (req.params as { roomId: string }).roomId;
@@ -28,6 +44,11 @@ app.register(async (app) => {
 
     const room = await makeOrLoadRoom(roomId);
     room.handleSocketConnect({ sessionId, socket });
+  });
+
+  app.get("/", (request, reply) => {
+    // console.log("/ request for ", path.join(path.resolve("."), "public"));
+    reply.sendFile("index.html"); // Serve the index.html from Vite
   });
 
   // To enable blob storage for assets, we add a simple endpoint supporting PUT and GET requests
