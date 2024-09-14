@@ -8,7 +8,7 @@
     "start": "npm run dev-node",
     "dev-node": "npx concurrently -n server,client -c red,blue \"npm run dev-server-node\" \"npm run dev-client\"",
     "dev-server-node": "npx -T tsx watch ./src/server/server.node.ts",
-    "dev-client": "vite --port $PORT --host",
+    "dev-client": "vite preview --port $PORT",
     "test-ci": "echo 'No tests yet'",
     "test": "yarn run -T jest --passWithNoTests",
     "test-coverage": "lazy inherit",
