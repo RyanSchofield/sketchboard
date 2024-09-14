@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/server/server.ts",
   "scripts": {
-    "start": "npm run dev-node",
+    "start": "npm run dev-server-node",
     "dev-node": "npx concurrently -n server,client -c red,blue \"npm run dev-server-node\" \"npm run dev-client\"",
     "dev-server-node": "npx -T tsx watch ./src/server/server.node.ts",
     "dev-client": "vite preview --port $PORT --host",
