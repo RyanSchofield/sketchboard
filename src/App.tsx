@@ -8,7 +8,9 @@ import {
   uniqueId,
 } from "tldraw";
 
-const HOST = location.origin.slice(0, -4).concat(process.env.PORT ?? "5858");
+// const HOST = location.origin.slice(0, -4).concat(process.env.PORT ?? "5858");
+const HOST = location.origin;
+console.log("host", HOST);
 const WORKER_URL = HOST;
 
 const roomId = 1;
