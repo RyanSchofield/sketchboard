@@ -4,9 +4,10 @@ import { join } from "path";
 
 import { createClient } from "@supabase/supabase-js";
 
+import "dotenv/config";
+
 const supabaseUrl = "https://bjkjjkhouyemcggignqb.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqa2pqa2hvdXllbWNnZ2lnbnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU0OTk3ODksImV4cCI6MjA0MTA3NTc4OX0.krqhc-HPBpjJpmQidzKC7BugXySY7jwzeFg7hV9zHmE";
+const supabaseKey = process.env.VITE_SUPABASE_KEY ?? "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const upsertJam = async (title, color, jsonData, id = "") => {
@@ -50,7 +51,7 @@ async function saveSnapshot(roomId: string, snapshot: RoomSnapshot) {
 
 // We'll keep an in-memory map of rooms and their data
 interface RoomState {
-  room: TLSocketRoom<any, void>;
+  room: TLSocketRoom;
   id: string;
   needsPersist: boolean;
 }

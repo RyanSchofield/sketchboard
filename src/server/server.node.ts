@@ -1,50 +1,19 @@
+import "dotenv/config";
+
 import cors from "@fastify/cors";
 import websocketPlugin from "@fastify/websocket";
 import fastify from "fastify";
 
-import { createClient } from "@supabase/supabase-js";
-
 import { loadAsset, storeAsset } from "./assets";
 import { makeOrLoadRoom } from "./rooms";
-// import { unfurl } from "./unfurl";
 
 const PORT = 5858;
-// const PORT = 5173;
 
 // For this example we use a simple fastify server with the official websocket plugin
 // To keep things simple we're skipping normal production concerns like rate limiting and input validation.
 const app = fastify();
 app.register(websocketPlugin);
 app.register(cors, { origin: "*" });
-
-const supabaseUrl = "https://bjkjjkhouyemcggignqb.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqa2pqa2hvdXllbWNnZ2lnbnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU0OTk3ODksImV4cCI6MjA0MTA3NTc4OX0.krqhc-HPBpjJpmQidzKC7BugXySY7jwzeFg7hV9zHmE";
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-/**
-    schema:
-    jams
-     - jam_id: int
-     - json: json
-     - title: string
-     - color: integer
-*/
-
-const getJams = async () => {
-  const { error, data } = await supabase.from("jams").select();
-};
-
-const createJam = async (title, color) => {
-  const newJam = {
-    title,
-    color,
-  };
-
-  const { error } = await supabase.from("jams").insert(newJam);
-
-  if (error) console.error(error);
-};
 
 app.register(async (app) => {
   app.get("/rooms", { websocket: true }, async (socket, req) => {
@@ -74,12 +43,6 @@ app.register(async (app) => {
     const data = await loadAsset(id);
     res.send(data);
   });
-
-  // To enable unfurling of bookmarks, we add a simple endpoint that takes a URL query param
-  // app.get("/unfurl", async (req, res) => {
-  //   const url = (req.query as any).url as string;
-  //   res.send(await unfurl(url));
-  // });
 });
 
 app.listen({ port: PORT, host: "0.0.0.0" }, (err) => {
