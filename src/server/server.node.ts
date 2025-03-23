@@ -42,8 +42,12 @@ app.register(async (app) => {
     // you need to extract it and pass it to the room.
     const sessionId = (req.query as { sessionId: string }).sessionId;
 
+    console.log('connect', 1)
+
     const room = await makeOrLoadRoom(roomId);
+    console.log('got the room')
     room.handleSocketConnect({ sessionId, socket });
+    console.log('handled socket connection')
   });
 
   app.get("/", (request, reply) => {

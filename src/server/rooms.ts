@@ -23,29 +23,47 @@ const upsertJam = async (title, color, jsonData, id = "") => {
   if (error) console.error(error);
 };
 
-// For this example we're just saving data to the local filesystem
+// Save to filesystem and database
 const DIR = "./.rooms";
 async function readSnapshotIfExists(roomId: string) {
   try {
     const data = await readFile(join(DIR, roomId));
-    // read from database here
+    console.log('read data from filesystem ', !!data)
     return JSON.parse(data.toString()) ?? undefined;
   } catch (e) {
+    console.log('attempt to read from db')
+    const query = supabase.from("jams").select("*").eq("jam_id", roomId);
+    const response = await query;
+    const data = response?.data?.[0] ?? undefined;
+
+    if (data) {
+      console.log('got something from db', JSON.parse(data.json))
+      // write to the file system here
+      if (data.json) writetoDisk(roomId, data.json);
+      return JSON.parse(data.json) ?? undefined;
+    }
+
+    console.log('error loading snapshot')
     return undefined;
   }
 }
 
+async function writetoDisk(roomId, jsonData) {
+  await mkdir(DIR, { recursive: true });
+  await writeFile(join(DIR, roomId), jsonData);
+}
+
 let isUpdating = false;
 async function saveSnapshot(roomId: string, snapshot: RoomSnapshot) {
-  await mkdir(DIR, { recursive: true });
+  
   const jsonData = JSON.stringify(snapshot);
-  await writeFile(join(DIR, roomId), jsonData);
+  writetoDisk(roomId, jsonData)
   console.log("saveSnapshot");
   if (!isUpdating) {
     isUpdating = true;
-    upsertJam("test", 123, jsonData, roomId);
+    upsertJam("new board " + roomId, 0, jsonData, roomId);
     console.log("updating");
-    setTimeout(() => (isUpdating = false), 15000);
+    setTimeout(() => (isUpdating = false), 5000);
   }
 }
 
@@ -119,4 +137,4 @@ setInterval(() => {
       rooms.delete(roomState.id);
     }
   }
-}, 2000);
+}, 100);
