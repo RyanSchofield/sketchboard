@@ -1,55 +1,123 @@
-import { useSync } from "@tldraw/sync";
-import {
-  AssetRecordType,
-  getHashForString,
-  TLAssetStore,
-  TLBookmarkAsset,
-  Tldraw,
-  uniqueId,
-} from "tldraw";
+import Board from "./Board";
+import React, {useState, useEffect} from "react";
 
-// const HOST = location.origin.slice(0, -4).concat(process.env.PORT ?? "5858");
+type RoomSwitcherProps = {handler: (number) => void}
+
 const HOST = location.origin;
-console.log("host", HOST);
-const WORKER_URL = HOST;
 
-const roomId = 1;
+class RoomSwitcher extends React.Component<RoomSwitcherProps> {
+	public state: {inputValue: string}
+	public handler: (id: number) => void
 
-function App() {
-  const store = useSync({
-    uri: `${WORKER_URL}/connect/${roomId}`,
-    assets: multiplayerAssets,
-  });
+	constructor(props) {
+		super(props)
+		this.state = {inputValue: ""}
+		this.handler = props.handler
+	}
 
-  return (
-    <div style={{ position: "fixed", inset: 0 }}>
-      <Tldraw store={store} />
-    </div>
-  );
+	reset() { this.state = {inputValue: ""} }
+
+	updateValue(event) {
+		this.setState({inputValue: event.target.value})
+	}
+
+	handleClick() {
+		this.handler(Number(this.state.inputValue))
+	}
+
+
+	render() {
+		return (
+			<div>
+				<div> Room ID: </div>
+				<input value={this.state.inputValue} onChange={this.updateValue.bind(this)}></input>
+				<button onClick={this.handleClick.bind(this)}>confirm</button>
+			</div> 
+		)
+	}
 }
 
-const multiplayerAssets: TLAssetStore = {
-  // to upload an asset, we prefix it with a unique id, POST it to our worker, and return the URL
-  async upload(_asset, file) {
-    const id = uniqueId();
+function BoardList(props) {
+	const url = `${HOST}/list`;
 
-    const objectName = `${id}-${file.name}`;
-    const url = `${WORKER_URL}/uploads/${encodeURIComponent(objectName)}`;
+	const [records, setRecords] = useState([]);
+  	const [loading, setLoading] = useState(true);
+  	const [error, setError] = useState(null as any);
 
-    const response = await fetch(url, {
-      method: "PUT",
-      body: file,
-    });
+	const handler: (id: number) => void = props.handler;
 
-    if (!response.ok) {
-      throw new Error(`Failed to upload asset: ${response.statusText}`);
-    }
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch(url);
+				if (!response.ok) {
+			  		throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				const data = await response.json();
+				setRecords(data.records);
+		  	} catch (e) {
+				setError(e);
+		  	} finally {
+				setLoading(false);
+		  	}
+		};
+	
+		fetchData();
+	  }, []);
+	
+	  if (loading) {
+		return <p>Loading records...</p>;
+	  }
+	
+	  if (error) {
+		return <p>Error: {error.message}</p>;
+	  }
+	
+	  return (
+		<div>
+		  <h1>Sessions</h1>
+		  <ul>
+			{records.map((record: any) => (
+			  	<li key={record.jam_id}>
+					<a href="javascript:;" onClick={() => handler(record.jam_id)}>
+						{record.title}
+					</a>
+				</li> 
+			))}
+		  </ul>
+		</div>
+	  );
+}
 
-    return url;
-  },
-  resolve(asset) {
-    return asset.props.src;
-  },
-};
+class App extends React.Component {
+
+	public state: {currentRoom: number}
+
+	constructor(props) {
+		super(props)
+		this.state = {currentRoom: 0}
+	}
+
+	changeRoom(id: number) {
+		this.setState({currentRoom: id})
+	}
+
+	reset() {
+		this.state = {currentRoom: 0}
+	}
+
+	render() {
+		if (this.state.currentRoom < 1) 
+			return (
+				<div>
+					<RoomSwitcher handler={this.changeRoom.bind(this)} />
+					<BoardList handler={this.changeRoom.bind(this)} />
+				</div>
+			);
+		
+		return <Board roomId={this.state.currentRoom} handler={this.changeRoom.bind(this)} />
+	}
+}
+
 
 export default App;

@@ -16,7 +16,7 @@ import path from "path";
 // import { fileURLToPath } from 'node:url';
 
 import { loadAsset, storeAsset } from "./assets";
-import { makeOrLoadRoom } from "./rooms";
+import { makeOrLoadRoom, readList } from "./rooms";
 
 const PORT = process.env.PORT ?? 5858;
 
@@ -38,21 +38,40 @@ app.register(async (app) => {
   // This is the main entrypoint for the multiplayer sync
   app.get("/connect/:roomId", { websocket: true }, async (socket, req) => {
     const roomId = (req.params as { roomId: string }).roomId;
-    // The sessionId is passed from the client as a query param,
-    // you need to extract it and pass it to the room.
     const sessionId = (req.query as { sessionId: string }).sessionId;
 
-    console.log('connect', 1)
+    console.log('connect', roomId)
+    // extract the connect message manually before creating the room
+		const connectMessagePromise = new Promise<string>((resolve) => {
+			const handleMessage = (message: any) => {
+				socket.removeEventListener('message', handleMessage)
+				resolve(message.data.toString())
+			}
+			socket.addEventListener('message', handleMessage)
+		})
+
+    // wait for the it with a timeout in case the message never arrives
+		const connectMessage = await Promise.race([
+			connectMessagePromise,
+			new Promise<string>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+		])
 
     const room = await makeOrLoadRoom(roomId);
     console.log('got the room')
     room.handleSocketConnect({ sessionId, socket });
     console.log('handled socket connection')
+
+    // finally pass along the connect message
+		room.handleSocketMessage(sessionId, connectMessage)
   });
 
   app.get("/", (request, reply) => {
-    // console.log("/ request for ", path.join(path.resolve("."), "public"));
     reply.sendFile("index.html"); // Serve the index.html from Vite
+  });
+
+  app.get("/list", async (request, reply) => {
+    const records = await readList();
+    reply.send({records: records});
   });
 
   // To enable blob storage for assets, we add a simple endpoint supporting PUT and GET requests
@@ -60,10 +79,13 @@ app.register(async (app) => {
   app.addContentTypeParser("*", (_, __, done) => done(null));
   app.put("/uploads/:id", {}, async (req, res) => {
     const id = (req.params as any).id as string;
-    await storeAsset(id, req.raw);
-    res.send({ ok: true });
-  });
+    let url = await storeAsset(id, req.raw);
+    console.log('uploads put request sending a url', url)
+    res.send({ ok: true, publicUrl: url});
+  }); 
   app.get("/uploads/:id", async (req, res) => {
+    // tldraw client resolves assets to supabase public url,
+    // but this endpoint can also be used
     const id = (req.params as any).id as string;
     const data = await loadAsset(id);
     res.send(data);

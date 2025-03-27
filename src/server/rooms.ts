@@ -48,6 +48,13 @@ async function readSnapshotIfExists(roomId: string) {
   }
 }
 
+export async function readList() {
+  const query = supabase.from("jams").select("*");
+  const response = await query;
+  const records = response?.data ?? [];
+  return records;
+}
+
 async function writetoDisk(roomId, jsonData) {
   await mkdir(DIR, { recursive: true });
   await writeFile(join(DIR, roomId), jsonData);
