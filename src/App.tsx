@@ -1,5 +1,7 @@
+import { uniqueId } from "tldraw";
 import Board from "./Board";
-import React, {useState, useEffect} from "react";
+import BoardList from "./BoardList";
+import React, { useState } from "react";
 
 type RoomSwitcherProps = {handler: (number) => void}
 
@@ -37,65 +39,76 @@ class RoomSwitcher extends React.Component<RoomSwitcherProps> {
 	}
 }
 
-function BoardList(props) {
-	const url = `${HOST}/list`;
+function NewBoard(props) {
+	// const [title, setTitle] = useState("")
+	// return (
+	// 	<div>
+	// 		<button onClick={async () => props.handler()}>
+	// 			New Board
+	// 		</button>
+	// 	</div>
+	//   );
 
-	const [records, setRecords] = useState([]);
-  	const [loading, setLoading] = useState(true);
-  	const [error, setError] = useState(null as any);
+	const [title, setTitle] = useState("");
 
-	const handler: (id: number) => void = props.handler;
+	const handleSubmit = (event) => {
+		event.preventDefault();
+		if (!title) return;
+		alert(`The name you entered was: ${title}`)
+		props.handler(title)
+	}
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await fetch(url);
-				if (!response.ok) {
-			  		throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				const data = await response.json();
-				setRecords(data.records);
-		  	} catch (e) {
-				setError(e);
-		  	} finally {
-				setLoading(false);
-		  	}
-		};
-	
-		fetchData();
-	  }, []);
-	
-	  if (loading) {
-		return <p>Loading records...</p>;
-	  }
-	
-	  if (error) {
-		return <p>Error: {error.message}</p>;
-	  }
-	
-	  return (
-		<div>
-		  <h1>Sessions</h1>
-		  <ul>
-			{records.map((record: any) => (
-			  	<li key={record.jam_id}>
-					<a href="javascript:;" onClick={() => handler(record.jam_id)}>
-						{record.title}
-					</a>
-				</li> 
-			))}
-		  </ul>
-		</div>
-	  );
+	return (
+		<form onSubmit={handleSubmit}>
+		<label>Enter your name:
+			<input 
+			type="text" 
+			value={title}
+			onChange={(e) => setTitle(e.target.value)}
+			/>
+		</label>
+		<input type="submit" />
+		</form>
+	)
 }
 
 class App extends React.Component {
 
-	public state: {currentRoom: number}
+	public state: {currentRoom: number, updateKey: string}
 
 	constructor(props) {
 		super(props)
-		this.state = {currentRoom: 0}
+		this.state = {currentRoom: 0, updateKey: uniqueId()}
+	}
+
+	async newRoom(title: string) {
+		if (!title) return;
+
+		const url = `${HOST}/new`;
+		try {
+			const requestOpts = { 
+				method: "PUT", 
+				body: JSON.stringify({title})
+			};
+			const response = await fetch(url, requestOpts);
+			if (!response.ok) {
+				throw new Error(`new room HTTP error! status: ${response.status}`);
+			}
+
+			setTimeout(() => this.refresh(), 100);
+		} catch (e) {
+			console.log('new room error', e)
+		}
+	}
+
+	refresh() {
+		// change key prop to trigger board list reload. 
+		const newState = {
+			currentRoom: this.state.currentRoom, 
+			updateKey: uniqueId()
+		};
+
+		this.setState(newState);
 	}
 
 	changeRoom(id: number) {
@@ -103,19 +116,29 @@ class App extends React.Component {
 	}
 
 	reset() {
-		this.state = {currentRoom: 0}
+		this.state = {currentRoom: 0, updateKey: uniqueId()}
 	}
 
 	render() {
 		if (this.state.currentRoom < 1) 
 			return (
 				<div>
+					<NewBoard handler={this.newRoom.bind(this)}/>
 					<RoomSwitcher handler={this.changeRoom.bind(this)} />
-					<BoardList handler={this.changeRoom.bind(this)} />
+					<BoardList 
+						handler={this.changeRoom.bind(this)}  
+						host={HOST}
+						key={this.state.updateKey} 
+					/>
 				</div>
 			);
 		
-		return <Board roomId={this.state.currentRoom} handler={this.changeRoom.bind(this)} />
+		return (
+			<Board 
+				handler={this.changeRoom.bind(this)} 
+				roomId={this.state.currentRoom} 
+			/>
+		);
 	}
 }
 

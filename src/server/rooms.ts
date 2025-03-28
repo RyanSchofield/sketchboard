@@ -10,17 +10,34 @@ const supabaseUrl = "https://bjkjjkhouyemcggignqb.supabase.co";
 const supabaseKey = process.env.VITE_SUPABASE_KEY ?? "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const upsertJam = async (title, color, jsonData, id = "") => {
-  const newJam = {
+const upsertJam = async (title, color, jsonData: any | null = null, id: string | null =  null) => {
+  const roomData: {title: string, color: number, json?: any, jam_id?: string} = {
     title: title,
     color: color,
-    json: jsonData,
-    jam_id: id,
   };
 
-  const { error } = await supabase.from("jams").upsert(newJam);
+  if (id) roomData.jam_id = id;
+  if (jsonData) roomData.json = jsonData
+
+  const { error } = await supabase.from("jams").upsert(roomData);
 
   if (error) console.error(error);
+};
+
+export async function newRoom(title?: string)  {
+  if (!title) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+    title = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+  
+  upsertJam(title, 0)
 };
 
 // Save to filesystem and database
@@ -49,7 +66,7 @@ async function readSnapshotIfExists(roomId: string) {
 }
 
 export async function readList() {
-  const query = supabase.from("jams").select("*");
+  const query = supabase.from("jams").select("*").order('created_at', {ascending: false});
   const response = await query;
   const records = response?.data ?? [];
   return records;

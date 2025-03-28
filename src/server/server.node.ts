@@ -16,7 +16,7 @@ import path from "path";
 // import { fileURLToPath } from 'node:url';
 
 import { loadAsset, storeAsset } from "./assets";
-import { makeOrLoadRoom, readList } from "./rooms";
+import { makeOrLoadRoom, readList, newRoom } from "./rooms";
 
 const PORT = process.env.PORT ?? 5858;
 
@@ -73,6 +73,19 @@ app.register(async (app) => {
     const records = await readList();
     reply.send({records: records});
   });
+
+  app.put("/new", {}, async (req, res) => {
+    try {
+      if (typeof req.body !== "string") return;
+      let params = JSON.parse(req.body);
+      await newRoom(params.title);
+      res.send({ ok: true });
+      
+    } catch (e) {
+      console.log('new room error', e)
+      res.send({ok: false})
+    }
+  }); 
 
   // To enable blob storage for assets, we add a simple endpoint supporting PUT and GET requests
   // But first we need to allow all content types with no parsing, so we can handle raw data
