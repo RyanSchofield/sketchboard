@@ -40,33 +40,25 @@ class RoomSwitcher extends React.Component<RoomSwitcherProps> {
 }
 
 function NewBoard(props) {
-	// const [title, setTitle] = useState("")
-	// return (
-	// 	<div>
-	// 		<button onClick={async () => props.handler()}>
-	// 			New Board
-	// 		</button>
-	// 	</div>
-	//   );
-
 	const [title, setTitle] = useState("");
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
 		if (!title) return;
-		alert(`The name you entered was: ${title}`)
+		alert(`Creating new board: ${title}`)
 		props.handler(title)
+		setTitle("")
 	}
 
 	return (
 		<form onSubmit={handleSubmit}>
-		<label>Enter your name:
-			<input 
+		<div>Enter title for new board:</div>
+		<br/>
+		<input 
 			type="text" 
 			value={title}
 			onChange={(e) => setTitle(e.target.value)}
-			/>
-		</label>
+		/>
 		<input type="submit" />
 		</form>
 	)
@@ -124,7 +116,8 @@ class App extends React.Component {
 			return (
 				<div>
 					<NewBoard handler={this.newRoom.bind(this)}/>
-					<RoomSwitcher handler={this.changeRoom.bind(this)} />
+					{/* @todo: implement debug mode */}
+					{/* <RoomSwitcher handler={this.changeRoom.bind(this)} /> */}
 					<BoardList 
 						handler={this.changeRoom.bind(this)}  
 						host={HOST}

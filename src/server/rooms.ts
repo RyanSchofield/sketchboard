@@ -5,17 +5,28 @@ import { join } from "path";
 import { createClient } from "@supabase/supabase-js";
 
 import "dotenv/config";
+import { createTLSchema, defaultShapeSchemas, UnknownRecord } from "tldraw";
+import { cardShapeProps } from "../card-shape-props";
 
 const supabaseUrl = "https://bjkjjkhouyemcggignqb.supabase.co";
 const supabaseKey = process.env.VITE_SUPABASE_KEY ?? "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const upsertJam = async (title, color, jsonData: any | null = null, id: string | null =  null) => {
-  const roomData: {title: string, color: number, json?: any, jam_id?: string} = {
-    title: title,
-    color: color,
-  };
+const upsertJam = async (
+  title = "", 
+  color: number | null = null, 
+  jsonData: any | null = null, 
+  id: string | null =  null
+) => {
+  const roomData: {
+    title?: string, 
+    color?: number, 
+    json?: any, 
+    jam_id?: string
+  } = {};
 
+  if (title) roomData.title = title;
+  if (color !== null) roomData.color = color;
   if (id) roomData.jam_id = id;
   if (jsonData) roomData.json = jsonData
 
@@ -49,7 +60,9 @@ async function readSnapshotIfExists(roomId: string) {
     return JSON.parse(data.toString()) ?? undefined;
   } catch (e) {
     console.log('attempt to read from db')
-    const query = supabase.from("jams").select("*").eq("jam_id", roomId);
+    const query = supabase.from("jams")
+      .select("*")
+      .eq("jam_id", roomId);
     const response = await query;
     const data = response?.data?.[0] ?? undefined;
 
@@ -66,7 +79,11 @@ async function readSnapshotIfExists(roomId: string) {
 }
 
 export async function readList() {
-  const query = supabase.from("jams").select("*").order('created_at', {ascending: false});
+  const query = supabase.from("jams")
+    .select("*")
+    .eq("active", true)
+    .order('created_at', {ascending: false});
+
   const response = await query;
   const records = response?.data ?? [];
   return records;
@@ -85,7 +102,7 @@ async function saveSnapshot(roomId: string, snapshot: RoomSnapshot) {
   console.log("saveSnapshot");
   if (!isUpdating) {
     isUpdating = true;
-    upsertJam("new board " + roomId, 0, jsonData, roomId);
+    upsertJam("", 0, jsonData, roomId);
     console.log("updating");
     setTimeout(() => (isUpdating = false), 5000);
   }
@@ -116,10 +133,18 @@ export async function makeOrLoadRoom(roomId: string) {
       console.log("loading room", roomId);
       const initialSnapshot = await readSnapshotIfExists(roomId);
 
+      const customShapeSchemas = {
+        card : {
+          props: cardShapeProps
+        }
+      }
+
+      const storeShapes = {...defaultShapeSchemas, ...customShapeSchemas}
+
       const roomState: RoomState = {
         needsPersist: false,
         id: roomId,
-        room: new TLSocketRoom({
+        room: new TLSocketRoom<UnknownRecord, void>({
           initialSnapshot,
           onSessionRemoved(room, args) {
             console.log("client disconnected", args.sessionId, roomId);
@@ -131,6 +156,8 @@ export async function makeOrLoadRoom(roomId: string) {
           onDataChange() {
             roomState.needsPersist = true;
           },
+          //@fixme: fix type
+          schema: createTLSchema({shapes: storeShapes})
         }),
       };
       rooms.set(roomId, roomState);

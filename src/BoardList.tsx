@@ -38,7 +38,7 @@ export default function BoardList(props) {
 	
 	  return (
 		<div>
-		  <h1>Sessions</h1>
+		  <h1>Boards:</h1>
 		  <ul>
 			{records.map((record: any) => (
 			  	<li key={record.jam_id}>

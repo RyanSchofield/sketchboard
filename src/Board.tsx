@@ -8,7 +8,14 @@ import {
   TldrawUiMenuGroup,
   TldrawUiMenuItem,
   uniqueId,
+  defaultShapeUtils,
+  TLUiAssetUrlOverrides,
 } from "tldraw";
+
+import { components, uiOverrides } from './ui-overrides'
+import { CardShapeTool } from "./CardShapeTool";
+import { CardShapeUtil } from "./CardShapeUtil";
+import { useRef } from "react";
 
 const HOST = location.origin;
 console.log("host", HOST);
@@ -73,20 +80,37 @@ function Board(props) {
             </DefaultMainMenu>
         )
     }
-    
-    
-    const components: TLComponents = {
-        MainMenu: CustomMainMenu
+
+    const customAssetUrls: TLUiAssetUrlOverrides = {
+        icons: {
+          'sigma-icon': 'sigma.svg',
+        },
     }
-  
+    
+    const customComponents: TLComponents = {
+        MainMenu: CustomMainMenu,
+        ...components
+    }
+    const customShapes = [CardShapeUtil]
+    const customTools = [CardShapeTool]
+    const storeShapes = useRef([...defaultShapeUtils, ...customShapes])
+
     const store = useSync({
         uri: `${HOST}/connect/${roomId}`,
         assets: multiplayerAssets,
+        shapeUtils: storeShapes.current
     });
   
     return (
         <div style={{ position: "fixed", inset: 0 }}>
-            <Tldraw components={components} store={store} />
+            <Tldraw 
+                assetUrls={customAssetUrls}
+                components={customComponents} 
+                overrides={uiOverrides}
+                shapeUtils={customShapes}
+                store={store} 
+                tools={customTools} 
+            />
         </div>
     );
   }
