@@ -37,17 +37,18 @@ export default function BoardList(props) {
 	  }
 	
 	  return (
-		<div>
-		  <h1>Boards:</h1>
-		  <ul>
-			{records.map((record: any) => (
-			  	<li key={record.jam_id}>
-					<a href="javascript:;" onClick={() => handler(record.jam_id)}>
-						{record.title}
-					</a>
-				</li> 
-			))}
-		  </ul>
-		</div>
+        <div className="board-list">
+            {records.map((record: any) => (
+                <div 
+                    key={record.jam_id} 
+                    className="list-entry" 
+                    onClick={() => handler(record.jam_id)}
+                >
+                    <span>
+                        {record.title}
+                    </span>
+                </div> 
+            ))}
+        </div>
 	  );
 }

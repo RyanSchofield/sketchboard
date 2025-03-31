@@ -1,10 +1,8 @@
-import { useState } from 'react'
 import {
 	HTMLContainer,
 	Rectangle2d,
 	ShapeUtil,
 	TLResizeInfo,
-	getDefaultColorTheme,
 	resizeBox,
     stopEventPropagation
 } from 'tldraw'

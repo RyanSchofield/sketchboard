@@ -3,4 +3,54 @@
 
 body {
     font-family: "Inter", sans-serif;
+    background-color: #f8f8f8;
+    width: 96vw;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.homepage {
+    /* display: flex;
+    flex-direction: column;
+    align-items: center; */
+    text-align: center;
+}
+
+h1 {
+    font-size: 3.2em;
+    margin-bottom: 0.6em;
+    color: #3182ed;
+    text-shadow: 1px 1px 0px #1368D8;
+    letter-spacing: 8px;
+}
+
+.board-list {
+    background-color: #fefefe;
+    border: 1px solid #fdfdfd;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;   
+}
+
+.new-board {
+    margin-bottom: 2em;
+}
+
+.list-entry {
+    position: relative;
+    background-color: #3182ed;
+    color: #fefefe;
+    margin: 16px;
+    border-radius: 999px;
+    line-height: 3em;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+      rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+}
+
+.list-entry:hover {
+    cursor: pointer;
+    color: #fff;
+    background-color: #1368D8;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 10px 15px -3px,
+      rgba(0, 0, 0, 0.2) 0px 4px 6px -2px;
 }

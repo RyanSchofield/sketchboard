@@ -1,4 +1,4 @@
-import { BaseBoxShapeTool, TLClickEventInfo } from 'tldraw'
+import { BaseBoxShapeTool } from 'tldraw'
 export class CardShapeTool extends BaseBoxShapeTool {
 	static override id = 'card'
 	static override initial = 'idle'

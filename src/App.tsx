@@ -52,14 +52,14 @@ function NewBoard(props) {
 
 	return (
 		<form onSubmit={handleSubmit}>
-		<div>Enter title for new board:</div>
-		<br/>
-		<input 
-			type="text" 
-			value={title}
-			onChange={(e) => setTitle(e.target.value)}
-		/>
-		<input type="submit" />
+			<div>Enter title for new board:</div>
+			<br/>
+			<input 
+				type="text" 
+				value={title}
+				onChange={(e) => setTitle(e.target.value)}
+			/>
+			<input type="submit" />
 		</form>
 	)
 }
@@ -114,8 +114,11 @@ class App extends React.Component {
 	render() {
 		if (this.state.currentRoom < 1) 
 			return (
-				<div>
-					<NewBoard handler={this.newRoom.bind(this)}/>
+				<div className="homepage">
+					<h1>Sketchboard</h1>
+					<div className="new-board">
+						<NewBoard handler={this.newRoom.bind(this)}/>
+					</div>
 					{/* @todo: implement debug mode */}
 					{/* <RoomSwitcher handler={this.changeRoom.bind(this)} /> */}
 					<BoardList 
