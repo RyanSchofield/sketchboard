@@ -178,7 +178,7 @@ export default class Codecell extends React.Component<
     if (!this.codeMirror) return;
 
     let myId = getClientID(this.codeMirror.state);
-    if (myId != this.props.version) {
+    if (myId != this.props.version && this.codeMirror.state.doc.toString() != this.props.code) {
         this.codeMirror.dispatch({changes: {
             from: 0,
             to: this.codeMirror.state.doc.length,
