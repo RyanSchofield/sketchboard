@@ -16,6 +16,8 @@ import { components, uiOverrides } from './ui-overrides'
 import { CardShapeTool } from "./CardShapeTool";
 import { CardShapeUtil } from "./CardShapeUtil";
 import { useRef } from "react";
+import { CodeShapeTool } from "./CodeShapeTool";
+import { CodeShapeUtil } from "./CodeShapeUtil";
 
 const HOST = location.origin;
 console.log("host", HOST);
@@ -91,8 +93,8 @@ function Board(props) {
         MainMenu: CustomMainMenu,
         ...components
     }
-    const customShapes = [CardShapeUtil]
-    const customTools = [CardShapeTool]
+    const customShapes = [CardShapeUtil, CodeShapeUtil]
+    const customTools = [CardShapeTool, CodeShapeTool]
     const storeShapes = useRef([...defaultShapeUtils, ...customShapes])
 
     const store = useSync({

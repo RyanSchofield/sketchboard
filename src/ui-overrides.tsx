@@ -23,6 +23,16 @@ export const uiOverrides: TLUiOverrides = {
 			},
 		}
 
+        tools.code = {
+			id: 'code',
+			icon: 'color',
+			label: 'Python',
+			kbd: 'p',
+			onSelect: () => {
+				editor.setCurrentTool('code')
+			},
+		}
+
 		return tools
 	},
 }
@@ -31,10 +41,12 @@ export const components: TLComponents = {
 	Toolbar: (props) => {
 		const tools = useTools()
 		const isCardSelected = useIsToolSelected(tools['card'])
+        const isCodeSelected = useIsToolSelected(tools['code'])
 		return (
 			<DefaultToolbar {...props}>
 				<DefaultToolbarContent />
 				<TldrawUiMenuItem {...tools['card']} isSelected={isCardSelected} />
+                <TldrawUiMenuItem {...tools['code']} isSelected={isCodeSelected} />
 			</DefaultToolbar>
 		)
 	},
@@ -44,6 +56,7 @@ export const components: TLComponents = {
 			<DefaultKeyboardShortcutsDialog {...props}>
 				<DefaultKeyboardShortcutsDialogContent />
 				<TldrawUiMenuItem {...tools['card']} />
+                <TldrawUiMenuItem {...tools['code']} />
 			</DefaultKeyboardShortcutsDialog>
 		)
 	},

@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 import { createTLSchema, defaultShapeSchemas, UnknownRecord } from "tldraw";
 import { cardShapeProps } from "../card-shape-props";
+import { codeShapeProps } from "../code-shape-props";
 
 const supabaseUrl = "https://bjkjjkhouyemcggignqb.supabase.co";
 const supabaseKey = process.env.VITE_SUPABASE_KEY ?? "";
@@ -133,9 +134,13 @@ export async function makeOrLoadRoom(roomId: string) {
       console.log("loading room", roomId);
       const initialSnapshot = await readSnapshotIfExists(roomId);
 
+      // need serverside ordering of changes for codeblock shape?
       const customShapeSchemas = {
         card : {
           props: cardShapeProps
+        },
+        code : {
+          props: codeShapeProps
         }
       }
 
