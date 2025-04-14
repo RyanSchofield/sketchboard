@@ -210,6 +210,7 @@ export default class Codecell extends React.Component<
     // Run the code.
     await this.kernel.run(code, (line) => {
       this.setState((state) => {
+        // console.log('ran some code', state)
         return {
           output: [...state.output, line],
         };
@@ -218,6 +219,8 @@ export default class Codecell extends React.Component<
 
     // Wait the minimum amount of run-time.
     await minimumWait;
+
+    console.log('ran some code', this.state.output)
 
     // Mark as not running.
     this.running = false;

@@ -86,6 +86,7 @@ function Board(props) {
     const customAssetUrls: TLUiAssetUrlOverrides = {
         icons: {
           'sigma-icon': 'sigma.svg',
+          'python-icon': 'python.svg'
         },
     }
     

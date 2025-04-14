@@ -25,7 +25,7 @@ export const uiOverrides: TLUiOverrides = {
 
         tools.code = {
 			id: 'code',
-			icon: 'color',
+			icon: 'python-icon',
 			label: 'Python',
 			kbd: 'p',
 			onSelect: () => {
