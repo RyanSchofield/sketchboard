@@ -52,15 +52,24 @@ export class CodeShapeUtil extends ShapeUtil<ICodeShape> {
                 console.log('update', update)
                 console.log('outerDiv', outerDiv.current)
                 console.log('height', update.view.dom?.clientHeight)
+
+                const props: any = {
+                    text: update.state.doc.toString(),
+                    version: getClientID(update.state)
+                }
+
+                if (
+                    update.view.dom?.clientWidth
+                    && update.view.dom?.clientHeight
+                ) {
+                    props.w = update.view.dom?.clientWidth;
+                    props.h = update.view.dom?.clientHeight;
+                }
+
                 this.editor.updateShape({
                     id: shape.id,
                     type: shape.type,
-                    props: {
-                        text: update.state.doc.toString(),
-                        version: getClientID(update.state),
-                        w: update.view.dom?.clientWidth,
-                        h: update.view.dom?.clientHeight + 40
-                    }
+                    props: props
                 })
             }
         } 
